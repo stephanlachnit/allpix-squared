@@ -15,6 +15,8 @@
 
 #include "core/config/Configuration.hpp"
 
+#include "objects/Pulse.hpp"
+
 namespace allpix {
     namespace mupix {
         /**
@@ -40,11 +42,10 @@ namespace allpix {
 
             /**
              * @brief Amplifies charge pulse
-             * @param timestep Step size of the input pulse
-             * @param pulse    Charge pulse
-             * @return Amplified pulse
+             * @param pulse Pulse object
+             * @return Amplified pulse vector
              */
-            virtual std::vector<double> amplify_pulse(double timestep, const std::vector<double>& pulse) const;
+            virtual std::vector<double> amplify_pulse(const Pulse& pulse) const;
 
             /**
              * @brief Calculate time of first threshold crossing (TS1)
@@ -88,18 +89,6 @@ namespace allpix {
             double get_ts2_integration_time() const { return ts2_integration_time_; };
 
         protected:
-            /**
-             * @brief Calculate the impulse response for a given time with a given charge.
-             * @note This needs to be implemented if the reference amplification code is used.
-             * @param time   time after the initial response
-             * @param charge charge at the initial response
-             * @return voltage of the response
-             */
-            virtual double impulse_response_function(double time, double charge) const;
-
-            // Whether to amplify the pulse fast or precise
-            bool fast_amplification_{};
-
             // Parameters for the threshold logic
             double threshold_{}, ts1_clock_{}, ts2_clock_{};
 

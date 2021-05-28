@@ -24,9 +24,9 @@ namespace allpix {
         public:
             MuPix10(Configuration& config);
 
-        protected:
-            double impulse_response_function(double time, double charge) const;
+            std::vector<double> amplify_pulse(const Pulse& pulse) const;
 
+        protected:
             // Impulse response function parameters
             double A_{}, R_{}, F_{};
         };

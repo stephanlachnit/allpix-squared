@@ -17,15 +17,13 @@ using namespace allpix::mupix;
 
 MuPixModel::MuPixModel(Configuration& config) {
     // Set default values
-    config.setDefault<bool>("fast_amplification", false);
     config.setDefault<double>("threshold", Units::get(30, "mV"));
     config.setDefault<double>("clock_bin_ts1", Units::get(8, "ns"));
     config.setDefault<double>("clock_bin_ts2", Units::get(128, "ns"));
     config.setDefault<double>("integration_time", Units::get(2, "us"));
     config.setDefault<double>("ts2_integration_time", Units::get(2, "us"));
 
-    // Get config values
-    fast_amplification_ = config.get<bool>("fast_amplification");
+    // Get config value
     threshold_ = config.get<double>("threshold");
     ts1_clock_ = config.get<double>("clock_bin_ts1");
     ts2_clock_ = config.get<double>("clock_bin_ts2");
@@ -33,43 +31,9 @@ MuPixModel::MuPixModel(Configuration& config) {
     ts2_integration_time_ = config.get<double>("ts2_integration_time");
 }
 
-std::vector<double> MuPixModel::amplify_pulse(double timestep, const std::vector<double>& pulse) const {
-    LOG(TRACE) << "Amplifying pulse";
-
-    auto ntimepoints = static_cast<size_t>(std::ceil(integration_time_ / timestep));
-    std::vector<double> amplified_pulse(ntimepoints);
-    auto input_length = pulse.size();
-    if(fast_amplification_) {
-        // ignores pulse shape, faster but less precise
-        auto total_charge = std::accumulate(pulse.begin(), pulse.end(), 0.);
-        size_t kmin = 0;
-        for(size_t k = 0; k < input_length; ++k) {
-            if(pulse[k] > 0.) {
-                kmin = k;
-                break;
-            }
-        }
-        for(size_t k = 0; k < ntimepoints; ++k) {
-            if(k < kmin) {
-                amplified_pulse[k] = 0.;
-            } else {
-                amplified_pulse[k] = impulse_response_function(static_cast<double>(k) * timestep, total_charge);
-            }
-        }
-    } else {
-        // equivalent to CSADigitizer, slower but more precise
-        for(size_t k = 0; k < ntimepoints; ++k) {
-            double outsum{};
-            size_t jmin = (k >= input_length - 1) ? k - (input_length - 1) : 0;
-            for(size_t i = jmin; i <= k; ++i) {
-                if((k - i) < input_length) {
-                    outsum += impulse_response_function(static_cast<double>(i) * timestep, pulse.at(k - i));
-                }
-            }
-            amplified_pulse.at(k) = outsum;
-        }
-    }
-    return amplified_pulse;
+std::vector<double> MuPixModel::amplify_pulse(const Pulse& pulse) const {
+    LOG(ERROR) << "Reference amplification called";
+    return std::vector<double>(1, 0.0);
 }
 
 std::tuple<bool, unsigned int> MuPixModel::get_ts1(double timestep, const std::vector<double>& pulse) const {
@@ -128,8 +92,4 @@ unsigned int MuPixModel::get_ts2(unsigned int ts1, double timestep, const std::v
     }
 
     return final_ts2_clock_cycles;
-}
-
-double MuPixModel::impulse_response_function(double, double) const {
-    return 0.; // no reference impulse response implementation
 }

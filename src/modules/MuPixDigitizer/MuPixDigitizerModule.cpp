@@ -106,7 +106,7 @@ void MuPixDigitizerModule::run(Event* event) {
         LOG(TRACE) << "Preparing pulse for pixel " << pixel_index << ", " << pulse_vec.size() << " bins of "
                    << Units::display(timestep, {"ps", "ns"}) << ", total charge: " << Units::display(pulse.getCharge(), "e");
 
-        auto amplified_pulse_vec = model_->amplify_pulse(timestep, pulse_vec);
+        auto amplified_pulse_vec = model_->amplify_pulse(pulse);
 
         if(output_pulsegraphs_) {
             // Fill a graph with the pulse:
